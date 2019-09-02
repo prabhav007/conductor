@@ -1,0 +1,44 @@
+{
+	"name": "createfile",
+	"description": "Workflow for creating file",
+	"version": 1,
+	"schemaVersion": 2,
+	"tasks": [{
+		"name": "login",
+		"taskReferenceName": "login_task",
+		"inputParameters": {
+			"http_request": {
+				"uri": "http://localhost:8100/api/v1/authenticate",
+				"method": "POST",
+				"contentType": "application/json",
+				"body": "{\"username\":\"9663616333\",\"password\":\"asdfasdf\"}",
+				"connectionTimeOut":"3600",
+                "readTimeOut":"10000"
+			}
+		},
+		"type": "HTTP"
+	},{
+		"name": "getvms",
+		"taskReferenceName": "getvms_task",
+		"inputParameters": {
+			"http_request": {
+				"uri": "http://localhost:8100/api/v1/top-vms?page=0&size=5",
+				"method": "GET",
+				"connectionTimeOut":"3600",
+                "readTimeOut":"10000",
+				"headers": {
+					"Authorization": "Bearer ${login_task.output.response.body.token}"
+				}
+			}
+		},
+		"type": "HTTP"
+	},{
+		"name": "file",
+		"taskReferenceName": "file_task",
+		"inputParameters": {
+			"body": "${getvms_task.output.response.body.vmList}",
+			"filename": "XYZ.txt"
+		},
+		"type": "FILE"
+	}]
+}

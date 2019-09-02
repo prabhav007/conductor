@@ -1,10 +1,23 @@
 package com.netflix.conductor.bootstrap;
 
+import static java.util.Collections.singletonList;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.ProvisionException;
 import com.google.inject.util.Modules;
 import com.netflix.conductor.cassandra.CassandraModule;
 import com.netflix.conductor.common.utils.ExternalPayloadStorage;
+import com.netflix.conductor.contribs.file.FileTask;
 import com.netflix.conductor.contribs.http.HttpTask;
 import com.netflix.conductor.contribs.http.RestClientManager;
 import com.netflix.conductor.contribs.json.JsonJqTransform;
@@ -17,17 +30,13 @@ import com.netflix.conductor.core.utils.S3PayloadStorage;
 import com.netflix.conductor.dao.RedisWorkflowModule;
 import com.netflix.conductor.elasticsearch.ElasticSearchModule;
 import com.netflix.conductor.mysql.MySQLWorkflowModule;
-import com.netflix.conductor.server.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static java.util.Collections.singletonList;
+import com.netflix.conductor.server.DynomiteClusterModule;
+import com.netflix.conductor.server.JerseyModule;
+import com.netflix.conductor.server.LocalRedisModule;
+import com.netflix.conductor.server.RedisClusterModule;
+import com.netflix.conductor.server.RedisSentinelModule;
+import com.netflix.conductor.server.ServerModule;
+import com.netflix.conductor.server.SwaggerModule;
 
 // TODO Investigate whether this should really be a ThrowingProvider.
 public class ModulesProvider implements Provider<List<AbstractModule>> {
@@ -131,6 +140,7 @@ public class ModulesProvider implements Provider<List<AbstractModule>> {
         new HttpTask(new RestClientManager(configuration), configuration);
         new KafkaPublishTask(configuration, new KafkaProducerManager(configuration));
         new JsonJqTransform();
+        new FileTask(configuration);
         modules.add(new ServerModule());
 
         return modules;

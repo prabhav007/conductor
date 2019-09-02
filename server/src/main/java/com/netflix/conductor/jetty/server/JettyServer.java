@@ -79,8 +79,8 @@ public class JettyServer implements Lifecycle {
             if (create) {
                 System.out.println("Creating kitchensink workflow");
                 createKitchenSink(port);
-                initializeWorkflow(port);
             }
+            initializeWorkflow(port);
         } catch (Exception e) {
             logger.error("Error loading sample!", e);
         }
