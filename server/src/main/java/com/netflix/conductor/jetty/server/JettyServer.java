@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.DispatcherType;
 import javax.ws.rs.core.MediaType;
+
+import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,6 +79,7 @@ public class JettyServer implements Lifecycle {
             if (create) {
                 System.out.println("Creating kitchensink workflow");
                 createKitchenSink(port);
+                initializeWorkflow(port);
             }
         } catch (Exception e) {
             logger.error("Error loading sample!", e);
@@ -93,6 +97,19 @@ public class JettyServer implements Lifecycle {
         }
         server.stop();
         server = null;
+    }
+    
+    private static void initializeWorkflow(int port) throws Exception {
+    	 Client client = Client.create();
+         ObjectMapper objectMapper = new ObjectMapper();
+//         InputStream stream = Main.class.getResourceAsStream("/createuser.json");
+         URL url = Main.class.getResource("/workflow/");
+         for(File file:new File(url.getPath()).listFiles()) {
+        	 InputStream stream = Main.class.getResourceAsStream("/workflow/"+file.getName());
+        	 client.resource("http://localhost:" + port + "/api/metadata/workflow").type(MediaType.APPLICATION_JSON).post(stream);
+        	 logger.info("{} workflow is created!", file.getName());
+         }
+         
     }
 
 

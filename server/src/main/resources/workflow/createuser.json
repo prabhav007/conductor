@@ -1,0 +1,52 @@
+{
+	"name": "createuser",
+	"description": "Workflow for creating user",
+	"version": 1,
+	"schemaVersion": 2,
+	"tasks": [{
+		"name": "signup",
+		"taskReferenceName": "signup_task",
+		"inputParameters": {
+			"http_request": {
+				"uri": "http://localhost:8100/api/v1/users",
+				"method": "POST",
+				"contentType": "application/json",
+				"body": "${workflow.input}",
+				"connectionTimeOut":"3600",
+                "readTimeOut":"10000"
+			}
+		},
+		"type": "HTTP"
+	},{
+		"name": "login",
+		"taskReferenceName": "login_task",
+		"inputParameters": {
+			"http_request": {
+				"uri": "http://localhost:8100/api/v1/authenticate",
+				"method": "POST",
+				"contentType": "application/json",
+				"body": "{\"username\":\"${workflow.input.mobile}\",\"password\":\"${workflow.input.password}\"}",
+				"connectionTimeOut":"3600",
+                "readTimeOut":"10000"
+			}
+		},
+		"type": "HTTP"
+	},{
+		"name": "provisionvm",
+		"taskReferenceName": "provisionvm_task",
+		"inputParameters": {
+			"http_request": {
+				"uri": "http://localhost:8100/api/v1/vms",
+				"method": "POST",
+				"contentType": "application/json",
+				"body": "{\"os\":\"Ubuntu\",\"ram\":2,\"disk\":1,\"cores\":1}",
+				"connectionTimeOut":"3600",
+                "readTimeOut":"10000",
+				"headers": {
+					"Authorization": "Bearer ${login_task.output.response.body.token}"
+				}
+			}
+		},
+		"type": "HTTP"
+	}]
+}
